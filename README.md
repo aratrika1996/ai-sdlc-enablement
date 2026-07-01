@@ -4,7 +4,7 @@ An interactive, explorable guide to using generative AI responsibly across the s
 development lifecycle, plus a full, reusable prompt library for developers, QA, and analysts.
 Tuned for Claude and ChatGPT, and built around approved-tools, human-in-the-loop guardrails.
 
-**Live site:** [ADD YOUR VERCEL URL HERE]
+**Live site:** https://ai-sdlc-enablement.vercel.app/
 
 ## What's here
 
