@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GenAI Across the SDLC — Enablement for Technical Teams</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B2239; --ink-2:#12324f; --slate:#4a5c72; --slate-2:#6b7c90;
+    --paper:#F4F7FA; --surface:#FFFFFF; --line:#E1E8F0; --line-2:#eef2f7;
+    --accent:#0E9AA7; --accent-deep:#0A6E79; --accent-tint:#E4F5F5;
+    --amber:#B45309; --amber-bg:#FBF1E1; --amber-line:#EAD4A8;
+    --clay:#B0442E; --clay-bg:#FBEDE9;
+    --grow:#2C7A54; --grow-bg:#E9F3EC;
+    --dev:#0E9AA7; --qa:#6D5AE0; --ba:#B45309;
+    --shadow:0 1px 2px rgba(11,34,57,.04), 0 8px 24px rgba(11,34,57,.06);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"IBM Plex Sans",system-ui,sans-serif;color:var(--ink);
+    background:var(--paper);line-height:1.5;-webkit-font-smoothing:antialiased;
+    padding:clamp(16px,4vw,44px);}
+  .wrap{max-width:1060px;margin:0 auto}
+
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent-deep);font-weight:500;margin-bottom:14px;
+    display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:1.5px;background:var(--accent)}
+  h1{font-family:"Space Grotesk",sans-serif;font-weight:700;letter-spacing:-.02em;
+    font-size:clamp(30px,5.4vw,50px);line-height:1.02;color:var(--ink)}
+  h1 .hl{color:var(--accent-deep)}
+  .lede{color:var(--slate);font-size:clamp(15px,1.7vw,17px);max-width:60ch;margin-top:16px}
+
+  .roles{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;align-items:center}
+  .roles .lbl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--slate-2);margin-right:6px}
+  .chip{font-family:"IBM Plex Sans",sans-serif;font-size:13.5px;font-weight:500;
+    border:1px solid var(--line);background:var(--surface);color:var(--slate);
+    padding:7px 15px;border-radius:999px;cursor:pointer;transition:all .16s ease}
+  .chip:hover{border-color:var(--accent);color:var(--accent-deep)}
+  .chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .stage-wrap{margin-top:40px}
+  .stage-head{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--slate-2);margin-bottom:16px}
+  .pipe{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  .pipe::before{content:"";position:absolute;top:26px;left:6%;right:6%;height:2px;
+    background:var(--line);z-index:0}
+  .node{position:relative;z-index:1;background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;padding:14px 8px 12px;cursor:pointer;text-align:center;
+    transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+    display:flex;flex-direction:column;align-items:center;gap:9px;font:inherit;color:inherit}
+  .node:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:var(--shadow)}
+  .node:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .node .dot{width:30px;height:30px;border-radius:50%;background:var(--paper);
+    border:1.5px solid var(--line);display:grid;place-items:center;
+    font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:14px;color:var(--slate);
+    transition:all .18s ease}
+  .node .nm{font-size:12.5px;font-weight:600;color:var(--slate);letter-spacing:-.01em}
+  .node[aria-selected="true"]{border-color:var(--accent-deep);box-shadow:var(--shadow)}
+  .node[aria-selected="true"] .dot{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff}
+  .node[aria-selected="true"] .nm{color:var(--ink)}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);margin-top:22px;overflow:hidden}
+  .panel-top{padding:24px clamp(20px,3vw,30px) 20px;border-bottom:1px solid var(--line-2)}
+  .panel-top .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent-deep);
+    font-weight:500;letter-spacing:.04em}
+  .panel-top h2{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:clamp(21px,3vw,27px);
+    letter-spacing:-.02em;margin:6px 0 8px}
+  .panel-top p{color:var(--slate);font-size:15px;max-width:64ch}
+  .panel-body{display:grid;grid-template-columns:1.05fr .95fr;gap:0}
+  .col{padding:22px clamp(20px,3vw,30px)}
+  .col.left{border-right:1px solid var(--line-2)}
+  .col h3{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--slate-2);margin-bottom:14px}
+
+  .case{display:flex;gap:11px;padding:11px 0;border-top:1px solid var(--line-2);transition:opacity .2s ease}
+  .case:first-of-type{border-top:none;padding-top:2px}
+  .case .txt{font-size:14.5px;color:var(--ink-2)}
+  .badges{display:flex;gap:4px;flex-shrink:0;padding-top:1px}
+  .badge{font-family:"IBM Plex Mono",monospace;font-size:9.5px;font-weight:500;
+    letter-spacing:.03em;padding:2px 6px;border-radius:5px;color:#fff;height:fit-content}
+  .b-dev{background:var(--dev)} .b-qa{background:var(--qa)} .b-ba{background:var(--ba)}
+  .case.dim{opacity:.28}
+  .case.match .txt{color:var(--ink);font-weight:500}
+
+  .prompt-wrap{position:relative}
+  .prompt{background:var(--ink);border-radius:11px;padding:44px 16px 15px;
+    font-family:"IBM Plex Mono",monospace;font-size:12.5px;line-height:1.55;color:#cfe8ea;
+    white-space:pre-wrap;word-break:break-word}
+  .prompt .ph{color:#7fd4d9}
+  .copy{position:absolute;top:11px;right:11px;background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.16);color:#dff4f5;font-family:"IBM Plex Mono",monospace;
+    font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;transition:all .15s ease}
+  .copy:hover{background:rgba(255,255,255,.16)}
+  .copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .copy.done{background:var(--accent);border-color:var(--accent);color:#fff}
+  .caution{margin-top:15px;display:flex;gap:9px;align-items:flex-start;
+    background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:10px;padding:11px 13px}
+  .caution svg{flex-shrink:0;margin-top:1px}
+  .caution .c-txt{font-size:13px;color:#7a4a10;line-height:1.45}
+  .caution b{color:var(--amber)}
+
+  .swap{animation:fade .34s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .frame{margin-top:34px;background:var(--ink);border-radius:var(--radius);
+    padding:20px clamp(20px,3vw,28px);display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px}
+  .frame .ftitle{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:#7fd4d9;margin-right:6px}
+  .fpart{color:#eaf6f7;font-size:14px}
+  .fpart b{font-family:"Space Grotesk",sans-serif;color:#fff;font-weight:600}
+  .fsep{color:#3a5a72}
+
+  .dd{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px clamp(18px,2.5vw,24px);box-shadow:var(--shadow)}
+  .card h3{font-family:"Space Grotesk",sans-serif;font-size:16px;font-weight:600;
+    margin-bottom:13px;display:flex;align-items:center;gap:9px}
+  .card.do{border-top:3px solid var(--grow)}
+  .card.dont{border-top:3px solid var(--clay)}
+  .card.do h3{color:var(--grow)} .card.dont h3{color:var(--clay)}
+  .card ul{list-style:none}
+  .card li{font-size:14px;color:var(--ink-2);padding:7px 0 7px 24px;position:relative;border-top:1px solid var(--line-2)}
+  .card li:first-child{border-top:none}
+  .card li::before{position:absolute;left:0;top:7px;font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600}
+  .card.do li::before{content:"+";color:var(--grow)}
+  .card.dont li::before{content:"\00d7";color:var(--clay)}
+
+  .gov{margin-top:16px;background:var(--amber-bg);border:1px solid var(--amber-line);
+    border-radius:var(--radius);padding:20px clamp(18px,2.5vw,26px)}
+  .gov h3{font-family:"Space Grotesk",sans-serif;font-size:15px;color:var(--amber);
+    margin-bottom:9px;display:flex;align-items:center;gap:9px}
+  .gov p{font-size:14px;color:#6f4410;max-width:none}
+  .gov .tool{font-size:12.5px;color:#8a5a1a;margin-top:9px;padding-top:9px;border-top:1px solid var(--amber-line)}
+  .gov .tool b{color:var(--amber)}
+
+  /* prompt library */
+  .lib-wrap{margin-top:40px}
+  .lib-intro{color:var(--slate);font-size:14.5px;max-width:66ch;margin:2px 0 18px}
+  .lgroup{border:1px solid var(--line);border-radius:12px;background:var(--surface);
+    margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow)}
+  .lhead{width:100%;display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;
+    background:none;border:none;font:inherit;color:var(--ink);text-align:left}
+  .lhead:hover{background:var(--accent-tint)}
+  .lhead:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .lhead .lname{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:16px;flex:1}
+  .lhead .lcount{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--slate-2);
+    background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+  .lhead .chev{color:var(--accent-deep);font-size:13px;transition:transform .2s ease}
+  .lhead[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .lpanel{display:none;padding:4px 18px 18px}
+  .lpanel.open{display:block}
+  .lcard{border-top:1px solid var(--line-2);padding:16px 0 4px;transition:opacity .2s ease}
+  .lcard:first-child{border-top:none}
+  .lcard.dim{opacity:.3}
+  .lcard-top{display:flex;align-items:baseline;gap:10px;margin-bottom:3px}
+  .lcard-title{font-weight:600;font-size:14.5px;color:var(--ink);flex:1}
+  .lcard-when{font-size:12.5px;color:var(--slate-2);margin-bottom:11px}
+
+  @media (max-width:720px){
+    .pipe{grid-template-columns:repeat(3,1fr);gap:8px}
+    .pipe::before{display:none}
+    .panel-body{grid-template-columns:1fr}
+    .col.left{border-right:none;border-bottom:1px solid var(--line-2)}
+    .dd{grid-template-columns:1fr}
+  }
+  @media (max-width:420px){ .pipe{grid-template-columns:repeat(2,1fr)} }
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">AI Enablement · Technical Teams</div>
+    <h1>GenAI across the <span class="hl">SDLC</span></h1>
+    <p class="lede">A practical, explorable guide to using generative AI responsibly at each stage of the software development lifecycle: what to use it for, how to prompt, and where human judgment stays in control. Tuned for Claude and ChatGPT.</p>
+
+    <div class="roles" role="group" aria-label="Filter by role">
+      <span class="lbl">View for</span>
+      <button class="chip" data-role="all" aria-pressed="true">Whole team</button>
+      <button class="chip" data-role="dev" aria-pressed="false">Developer</button>
+      <button class="chip" data-role="qa" aria-pressed="false">QA</button>
+      <button class="chip" data-role="ba" aria-pressed="false">Analyst</button>
+    </div>
+  </header>
+
+  <section class="stage-wrap">
+    <div class="stage-head">Explore the pipeline — pick a stage</div>
+    <div class="pipe" id="pipe" role="tablist" aria-label="SDLC stages"></div>
+
+    <div class="panel">
+      <div class="panel-top" id="ptop"></div>
+      <div class="panel-body">
+        <div class="col left">
+          <h3>Where AI helps</h3>
+          <div id="cases"></div>
+        </div>
+        <div class="col right">
+          <h3>Try this prompt</h3>
+          <div class="prompt-wrap">
+            <button class="copy" id="copyBtn">Copy</button>
+            <div class="prompt" id="prompt">Loading…</div>
+          </div>
+          <div class="caution" id="caution"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lib-wrap">
+    <div class="stage-head">The full prompt library — copy and use</div>
+    <p class="lib-intro">A reusable set of prompts for every stage of the SDLC, tagged by role. Fill in the <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent-deep)">[BRACKETED]</span> parts, treat every output as a first draft, and never paste confidential or production data.</p>
+    <div id="lib"></div>
+  </section>
+
+  <div class="frame">
+    <span class="ftitle">Prompt in 4 parts</span>
+    <span class="fpart"><b>Context</b> — system &amp; constraints</span><span class="fsep">/</span>
+    <span class="fpart"><b>Role</b> — expertise to adopt</span><span class="fsep">/</span>
+    <span class="fpart"><b>Task</b> — one ask + format</span><span class="fsep">/</span>
+    <span class="fpart"><b>Check</b> — surface assumptions, then verify</span>
+  </div>
+
+  <div class="dd">
+    <div class="card do">
+      <h3>Do</h3>
+      <ul>
+        <li>Treat every output as a first draft and review it.</li>
+        <li>Give rich context: code snippets, requirements, examples.</li>
+        <li>Iterate in follow-ups to refine the result.</li>
+        <li>Ask it to surface its assumptions and risks.</li>
+        <li>Use it to learn: “explain this code, or this error.”</li>
+      </ul>
+    </div>
+    <div class="card dont">
+      <h3>Don’t</h3>
+      <ul>
+        <li>Enter confidential, client, personal, or production data or credentials.</li>
+        <li>Ship code or specs you don’t understand.</li>
+        <li>Trust facts without verifying against a source of truth.</li>
+        <li>Treat it as a system of record.</li>
+        <li>Assume it knows internal or proprietary systems.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="gov">
+    <h3>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Enterprise guardrails
+    </h3>
+    <p>Use only approved tools and accounts. Never enter confidential, personal, or regulated data. AI assists, and humans stay accountable for every output. When unsure, check with your team lead or risk &amp; compliance.</p>
+    <div class="tool"><b>Tool note:</b> Claude suits long documents and large-context reasoning; ChatGPT suits quick snippets and brainstorming. Both follow the same rules, so use whichever is on your approved-tools list.</div>
+  </div>
+
+  <footer style="margin-top:30px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center">
+    <span style="font-size:13px;color:var(--slate)">Sample enablement asset · Prepared by <b style="color:var(--ink)">Aratrika Mukherjee</b></span>
+    <a href="https://github.com/aratrika1996" target="_blank" rel="noopener" style="color:var(--accent-deep);text-decoration:none;font-weight:500;font-size:13px;font-family:'IBM Plex Mono',monospace">↳ source &amp; prompt library on GitHub</a>
+  </footer>
+
+</div>
+
+<script>
+// Editorial content for the pipeline explorer (prompt text comes from prompts.json)
+const STAGES = [
+  { id:"plan", num:"1", name:"Plan & Analyze", kicker:"Stage 1 — Plan & Analyze",
+    tagline:"Turn raw requirements into structured, testable artifacts before a line of code is written.",
+    cases:[
+      {roles:["ba"], txt:"Draft user stories and acceptance criteria from a raw requirement."},
+      {roles:["ba"], txt:"Summarize a long spec into goals, constraints, and open questions."},
+      {roles:["ba","dev"], txt:"Outline use-case and flow diagrams as Mermaid to refine in draw.io."},
+    ],
+    caution:"AI can invent requirements that sound plausible. <b>Validate every story with the product owner.</b>" },
+  { id:"design", num:"2", name:"Design", kicker:"Stage 2 — Design",
+    tagline:"Explore options and draft interface contracts faster, while you own the final decision.",
+    cases:[
+      {roles:["dev"], txt:"Compare 2–3 architecture options with trade-offs."},
+      {roles:["dev"], txt:"Draft an API contract or endpoint spec from a description."},
+      {roles:["dev","ba"], txt:"Generate a sequence diagram (Mermaid) for a key flow."},
+    ],
+    caution:"Designs reflect general patterns, not your internal systems. <b>A human owns the final architecture.</b>" },
+  { id:"build", num:"3", name:"Build", kicker:"Stage 3 — Build",
+    tagline:"Accelerate routine coding and make unfamiliar code understandable.",
+    cases:[
+      {roles:["dev"], txt:"Scaffold functions and boilerplate from a short spec."},
+      {roles:["dev"], txt:"Explain unfamiliar code while onboarding to a codebase."},
+      {roles:["dev"], txt:"Suggest a refactor that improves readability without changing behaviour."},
+    ],
+    caution:"Never ship code you don’t understand. <b>Review and test every generated line.</b>" },
+  { id:"test", num:"4", name:"Test", kicker:"Stage 4 — Test (QA)",
+    tagline:"Broaden coverage and surface edge cases earlier in the cycle.",
+    cases:[
+      {roles:["qa"], txt:"Generate test cases grouped by happy path, edge, error, and permissions."},
+      {roles:["qa"], txt:"Draft unit and integration tests for a given function."},
+      {roles:["qa"], txt:"Create realistic, entirely fictional test data — no real identifiers."},
+    ],
+    caution:"Generated tests can miss domain rules. <b>A tester still designs the coverage.</b>" },
+  { id:"review", num:"5", name:"Review & Doc", kicker:"Stage 5 — Review & Document",
+    tagline:"Turn finished work into clear reviews and user-ready documentation.",
+    cases:[
+      {roles:["dev","ba"], txt:"Draft READMEs, code comments, and help guides."},
+      {roles:["dev","qa"], txt:"Summarize a pull request: what changed, why, and what to test."},
+      {roles:["ba"], txt:"Rewrite technical content for a non-technical audience."},
+    ],
+    caution:"AI polishes wording, not accuracy. <b>Verify every claim against the real behaviour.</b>" },
+  { id:"deploy", num:"6", name:"Deploy & Support", kicker:"Stage 6 — Deploy & Support",
+    tagline:"Make releases and incidents easier to communicate to every audience.",
+    cases:[
+      {roles:["dev"], txt:"Draft runbooks and release notes from a change list."},
+      {roles:["dev","qa"], txt:"Summarize an incident into a clear post-mortem skeleton."},
+      {roles:["ba"], txt:"Build FAQs and quick-reference material for support."},
+    ],
+    caution:"Keep confidential incident detail out of prompts. <b>AI drafts the narrative; humans confirm the facts.</b>" },
+];
+
+const ROLE_LABEL = { dev:"DEV", qa:"QA", ba:"BA" };
+let current = 0;
+let role = "all";
+let PROMPTS = null;        // { stageId: [ {title, roles, when, text}, ... ] }
+let currentFeatured = "";
+const LIBRAW = {};
+
+const pipe = document.getElementById("pipe");
+const ptop = document.getElementById("ptop");
+const casesEl = document.getElementById("cases");
+const promptEl = document.getElementById("prompt");
+const cautionEl = document.getElementById("caution");
+const copyBtn = document.getElementById("copyBtn");
+const libEl = document.getElementById("lib");
+
+STAGES.forEach((s, i) => {
+  const b = document.createElement("button");
+  b.className = "node"; b.setAttribute("role","tab");
+  b.setAttribute("aria-selected", i===0 ? "true":"false");
+  b.innerHTML = `<span class="dot">${s.num}</span><span class="nm">${s.name}</span>`;
+  b.addEventListener("click", () => select(i));
+  b.addEventListener("keydown", (e) => {
+    if(e.key==="ArrowRight"){e.preventDefault();select((i+1)%STAGES.length,true);}
+    if(e.key==="ArrowLeft"){e.preventDefault();select((i-1+STAGES.length)%STAGES.length,true);}
+  });
+  pipe.appendChild(b);
+});
+
+function highlightPrompt(text){
+  const esc = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return esc.replace(/\[[^\]]+\]/g, m => `<span class="ph">${m}</span>`);
+}
+
+function renderCases(){
+  const s = STAGES[current];
+  casesEl.innerHTML = "";
+  s.cases.forEach(c => {
+    const row = document.createElement("div");
+    const matches = role==="all" || c.roles.includes(role);
+    row.className = "case" + (role!=="all" ? (matches ? " match" : " dim") : "");
+    const badges = c.roles.map(r => `<span class="badge b-${r}">${ROLE_LABEL[r]}</span>`).join("");
+    row.innerHTML = `<span class="badges">${badges}</span><span class="txt">${c.txt}</span>`;
+    casesEl.appendChild(row);
+  });
+}
+
+function select(i, focus){
+  current = i;
+  const s = STAGES[i];
+  [...pipe.children].forEach((n,idx)=>n.setAttribute("aria-selected", idx===i?"true":"false"));
+  ptop.innerHTML = `<div class="kicker">${s.kicker}</div><h2>${s.name}</h2><p>${s.tagline}</p>`;
+  renderCases();
+  if(PROMPTS && PROMPTS[s.id] && PROMPTS[s.id][0]){
+    currentFeatured = PROMPTS[s.id][0].text;
+    promptEl.innerHTML = highlightPrompt(currentFeatured);
+  } else {
+    currentFeatured = "";
+    promptEl.textContent = "Loading…";
+  }
+  cautionEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="c-txt">${s.caution}</span>`;
+  copyBtn.textContent = "Copy"; copyBtn.classList.remove("done");
+  const panel = document.querySelector(".panel-body");
+  panel.classList.remove("swap"); void panel.offsetWidth; panel.classList.add("swap");
+  if(focus) pipe.children[i].focus();
+}
+
+document.querySelectorAll(".chip").forEach(chip=>{
+  chip.addEventListener("click", ()=>{
+    role = chip.dataset.role;
+    document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed", c===chip?"true":"false"));
+    renderCases();
+    applyRoleToLibrary();
+  });
+});
+
+async function doCopy(btn, text){
+  if(!text) return;
+  try{ await navigator.clipboard.writeText(text); }
+  catch(e){ const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(_){}document.body.removeChild(ta); }
+  const orig = btn.textContent; btn.textContent="Copied ✓"; btn.classList.add("done");
+  setTimeout(()=>{btn.textContent=orig;btn.classList.remove("done");},1600);
+}
+copyBtn.addEventListener("click", ()=>doCopy(copyBtn, currentFeatured));
+
+function renderLibrary(stages){
+  libEl.innerHTML = "";
+  stages.forEach((g, gi) => {
+    const grp = document.createElement("div"); grp.className = "lgroup";
+    const head = document.createElement("button"); head.className = "lhead";
+    head.setAttribute("aria-expanded", gi===0 ? "true" : "false");
+    head.innerHTML = `<span class="lname">${g.name}</span><span class="lcount">${g.prompts.length} prompts</span><span class="chev">▸</span>`;
+    const panel = document.createElement("div"); panel.className = "lpanel" + (gi===0 ? " open" : "");
+    g.prompts.forEach((it, ii) => {
+      const pid = `lib-${gi}-${ii}`; LIBRAW[pid] = it.text;
+      const card = document.createElement("div"); card.className = "lcard"; card.dataset.roles = it.roles.join(",");
+      const badges = it.roles.map(r=>`<span class="badge b-${r}">${ROLE_LABEL[r]}</span>`).join("");
+      card.innerHTML = `<div class="lcard-top"><span class="lcard-title">${it.title}</span><span class="badges">${badges}</span></div>
+        <div class="lcard-when">${it.when||""}</div>
+        <div class="prompt-wrap"><button class="copy lib-copy" data-target="${pid}">Copy</button><div class="prompt">${highlightPrompt(it.text)}</div></div>`;
+      panel.appendChild(card);
+    });
+    head.addEventListener("click", ()=>{ const open = panel.classList.toggle("open"); head.setAttribute("aria-expanded", open?"true":"false"); });
+    grp.appendChild(head); grp.appendChild(panel); libEl.appendChild(grp);
+  });
+  applyRoleToLibrary();
+}
+
+libEl.addEventListener("click", (e)=>{
+  const btn = e.target.closest(".lib-copy"); if(!btn) return;
+  doCopy(btn, LIBRAW[btn.dataset.target]);
+});
+
+function applyRoleToLibrary(){
+  document.querySelectorAll(".lcard").forEach(card=>{
+    const r = card.dataset.roles.split(",");
+    card.classList.toggle("dim", role!=="all" && !r.includes(role));
+  });
+}
+
+// Load the single source of truth
+fetch("prompts.json")
+  .then(r => { if(!r.ok) throw new Error("http "+r.status); return r.json(); })
+  .then(data => {
+    PROMPTS = {};
+    data.stages.forEach(s => PROMPTS[s.id] = s.prompts);
+    renderLibrary(data.stages);
+    select(current);
+  })
+  .catch(() => {
+    promptEl.textContent = "The prompts load when this page is served over http. Deploy it, or run a local server (e.g. npx serve) to view them.";
+    libEl.innerHTML = '<p class="lib-intro">The prompt library loads from prompts.json when this page is served over http. Deploy to Vercel, or run a local server such as <code>npx serve</code> or <code>python3 -m http.server</code>, to view it.</p>';
+  });
+
+select(0);

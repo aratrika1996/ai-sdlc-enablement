@@ -1,0 +1,167 @@
+{
+  "meta": {
+    "title": "GenAI Prompt Library for Technical Teams",
+    "subtitle": "Reusable prompts across the software development lifecycle, for developers, QA, and analysts.",
+    "tools": ["Claude", "ChatGPT"],
+    "roleLabels": { "dev": "DEV", "qa": "QA", "ba": "BA" },
+    "guardrails": [
+      "Never paste confidential, client, personal, regulated, or production data, including credentials and keys.",
+      "Use only approved tools and accounts, and follow your organization's approved-tools list.",
+      "You stay accountable. AI assists; a human owns every output that ships.",
+      "Verify facts against a source of truth. Models can be confidently wrong.",
+      "Do not assume internal knowledge. The model does not know your proprietary systems unless you give it context."
+    ]
+  },
+  "stages": [
+    {
+      "id": "plan",
+      "name": "Plan & Analyze",
+      "prompts": [
+        {
+          "title": "User stories from a requirement",
+          "roles": ["ba"],
+          "when": "Turning a raw requirement into structured backlog items.",
+          "text": "You are a business analyst. From the requirement below, write 3-5 user\nstories (\"As a [role], I want [goal] so that [benefit]\"), each with\nGiven/When/Then acceptance criteria. Then list your assumptions and any\nambiguous points. Requirement: [PASTE NON-CONFIDENTIAL TEXT]"
+        },
+        {
+          "title": "Summarize a long requirements document",
+          "roles": ["ba"],
+          "when": "Getting the essence of a long spec quickly.",
+          "text": "Summarize the document below for a [DEV / QA / STAKEHOLDER] audience in\nunder 200 words. Lead with the core goal, then list key requirements,\nconstraints, and open questions as bullets. Flag anything contradictory.\n[PASTE NON-CONFIDENTIAL TEXT]"
+        },
+        {
+          "title": "Use-case / flow diagram (Mermaid)",
+          "roles": ["ba", "dev"],
+          "when": "Producing a first-draft diagram to refine in draw.io.",
+          "text": "From this process description, produce a Mermaid flowchart (graph TD)\nshowing the main steps, decision points, and outcomes. Keep labels short.\nAfter the diagram, list any steps you inferred so I can correct them.\nProcess: [DESCRIBE THE PROCESS]"
+        }
+      ]
+    },
+    {
+      "id": "design",
+      "name": "Design",
+      "prompts": [
+        {
+          "title": "Compare architecture options",
+          "roles": ["dev"],
+          "when": "Exploring approaches before committing to one.",
+          "text": "Act as a senior software architect. For [FEATURE], propose 2-3 design\napproaches. For each, give pros, cons, and when to choose it. Note risks\nand open questions. Constraints: [STACK / SCALE / SECURITY]."
+        },
+        {
+          "title": "Draft an API contract",
+          "roles": ["dev"],
+          "when": "Turning a description into an endpoint spec.",
+          "text": "Draft an API contract for [FEATURE]. For each endpoint, give the method,\npath, request and response schema, and error cases. Note any assumptions.\nStyle: [REST / GraphQL]. Context: [DESCRIBE]."
+        },
+        {
+          "title": "Sequence diagram (Mermaid)",
+          "roles": ["dev", "ba"],
+          "when": "Visualizing a flow between components.",
+          "text": "Produce a Mermaid sequence diagram for the flow below, showing each actor\nand system and the messages between them. After it, note anything you\nassumed. Flow: [DESCRIBE THE INTERACTION]"
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "name": "Build",
+      "prompts": [
+        {
+          "title": "Scaffold a function from a spec",
+          "roles": ["dev"],
+          "when": "Starting routine or boilerplate code.",
+          "text": "You are a senior [LANGUAGE] developer. Write a function that [DOES WHAT].\nInputs: [INPUTS]. Output: [OUTPUT]. Include input validation and clear\ncomments. Then list edge cases I should test and any assumptions you made."
+        },
+        {
+          "title": "Explain unfamiliar code",
+          "roles": ["dev"],
+          "when": "Onboarding to a codebase or reviewing another person's work.",
+          "text": "Explain what the code below does, step by step, for a developer who is new\nto this codebase. Call out inputs, outputs, side effects, and anything\nrisky. Then suggest one improvement. [PASTE CODE]"
+        },
+        {
+          "title": "Suggest a refactor",
+          "roles": ["dev"],
+          "when": "Improving readability without changing behaviour.",
+          "text": "Refactor the code below for readability and maintainability without\nchanging its behaviour. Explain each change briefly and confirm the public\ninterface is unchanged. Flag anything you are unsure about. [PASTE CODE]"
+        },
+        {
+          "title": "Debug an error",
+          "roles": ["dev"],
+          "when": "You have an error message and a snippet.",
+          "text": "I am getting this error: [ERROR MESSAGE]. Here is the relevant code and\nwhat I expected to happen. List the most likely causes in order of\nprobability, explain why, and suggest a fix for each. Do not assume\nlibraries I have not shown. [PASTE CODE + EXPECTED BEHAVIOUR]"
+        }
+      ]
+    },
+    {
+      "id": "test",
+      "name": "Test (QA)",
+      "prompts": [
+        {
+          "title": "Generate test cases and edge cases",
+          "roles": ["qa"],
+          "when": "Building coverage for a feature.",
+          "text": "You are a QA engineer. For the feature below, list test cases as a table:\nScenario | Steps | Expected result. Group into happy path, edge cases,\nerror handling, and permission checks. Feature: [DESCRIBE FEATURE + RULES]"
+        },
+        {
+          "title": "Draft a unit test",
+          "roles": ["qa"],
+          "when": "A starting test you will verify and adapt.",
+          "text": "Write [FRAMEWORK] unit tests for the function below. Cover normal inputs,\nboundary values, and invalid inputs. Use clear test names that describe\nthe scenario. Note any behaviour you had to assume. [PASTE FUNCTION]"
+        },
+        {
+          "title": "Create realistic test data",
+          "roles": ["qa"],
+          "when": "You need varied, non-sensitive sample data.",
+          "text": "Generate [N] rows of realistic but entirely fictional test data for\n[ENTITY] with these fields: [FIELDS]. Include a mix of typical, boundary,\nand invalid values. Output as CSV. Use no real names or identifiers."
+        }
+      ]
+    },
+    {
+      "id": "review",
+      "name": "Review & Document",
+      "prompts": [
+        {
+          "title": "Draft a help guide from a feature",
+          "roles": ["dev", "ba"],
+          "when": "Turning a built feature into user-facing documentation.",
+          "text": "You are a technical writer. Write a help-guide section for end users on\nhow to [USE FEATURE]. Audience: [non-technical]. Include a one-line\npurpose, numbered steps, and a short troubleshooting list. Plain language."
+        },
+        {
+          "title": "Summarize a pull request",
+          "roles": ["dev", "qa"],
+          "when": "Reviewing changes or writing release notes.",
+          "text": "Summarize the changes in this diff for a reviewer: what changed, why it\nlikely changed, and what to test. List risks or areas needing closer\nreview. Keep it under 150 words. [PASTE DIFF OR DESCRIPTION]"
+        },
+        {
+          "title": "Translate technical content for a non-technical reader",
+          "roles": ["ba"],
+          "when": "A stakeholder needs the impact, not the internals.",
+          "text": "Rewrite the technical explanation below for a non-technical business\nstakeholder. Keep it accurate, lead with the impact, and replace jargon\nwith plain terms. Aim for under 150 words. [PASTE TEXT]"
+        }
+      ]
+    },
+    {
+      "id": "deploy",
+      "name": "Deploy & Support",
+      "prompts": [
+        {
+          "title": "Release notes for two audiences",
+          "roles": ["dev"],
+          "when": "Announcing a change to users and to engineers.",
+          "text": "Summarize the changes below into release notes for two audiences: a\none-line summary for end users and a technical bullet list for engineers.\nFlag anything needing a migration or downtime note. Changes: [PASTE]"
+        },
+        {
+          "title": "Incident post-mortem skeleton",
+          "roles": ["dev", "qa"],
+          "when": "Turning incident notes into a structured write-up.",
+          "text": "From the incident notes below, draft a blameless post-mortem skeleton:\nsummary, impact, timeline, root cause, and follow-up actions. Keep\nconfidential detail out. Notes: [PASTE NON-CONFIDENTIAL SUMMARY]"
+        },
+        {
+          "title": "Support FAQ from a feature",
+          "roles": ["ba"],
+          "when": "Preparing support material for a new feature.",
+          "text": "Write a short support FAQ for [FEATURE] aimed at end users: 5-7 common\nquestions with plain-language answers, plus one \"who to contact\" line.\nFeature details: [DESCRIBE]."
+        }
+      ]
+    }
+  ]
+}
